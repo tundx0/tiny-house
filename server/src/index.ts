@@ -19,9 +19,6 @@ const ser = async (app: Application) => {
   app.listen(port);
 
   console.log(`[app running on]: http://localhost:${port}`);
-
-  const listings = await db.listings.find({}).toArray();
-  console.log(listings);
 };
 
 ser(app);
