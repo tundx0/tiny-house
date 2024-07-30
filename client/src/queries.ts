@@ -1,11 +1,17 @@
 import { gql } from "./__generated__/gql";
 
-export const GET_ITEMS = gql(/* GraphQL */ `
-  query GetItems {
-    items {
+export const GET_LISTINGS = gql(/* GraphQL */ `
+  query GetListings {
+    listings {
+      address
       id
-      name
-      description
+      image
+      numOfBaths
+      numOfBeds
+      numOfGuests
+      price
+      rating
+      title
     }
   }
 `);
