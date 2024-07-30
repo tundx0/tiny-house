@@ -1,4 +1,3 @@
-import "./App.css";
 import { Listings } from "./components";
 
 function App() {

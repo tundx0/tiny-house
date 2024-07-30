@@ -9,3 +9,7 @@ export type Listing = {
   rating: number;
   title: string;
 };
+
+export interface ListingCardProps {
+  listing: Listing;
+}
