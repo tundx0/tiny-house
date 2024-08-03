@@ -103,7 +103,11 @@ export const viewerResolvers = {
       }
     },
     logOut: () => {
-      return "Mutation.logOut";
+      try {
+        return { didRequest: true };
+      } catch (error) {
+        throw new Error(`Log out Failure: ${error}`);
+      }
     },
   },
   Viewer: {
