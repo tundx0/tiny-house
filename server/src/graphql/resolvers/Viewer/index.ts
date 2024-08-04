@@ -40,27 +40,16 @@ const logInViaGoogle = async (
           email: userEmail,
           token,
         },
+        $setOnInsert: {
+          income: 0,
+          bookings: [],
+          listings: [],
+        },
       },
       { upsert: true, returnDocument: "after" }
     );
 
-    let viewer = updateRes;
-    if (!viewer) {
-      const insertRes = await db.users.insertOne({
-        _id: userId,
-        token,
-        name: userName,
-        avatar: userAvatar,
-        email: userEmail,
-        income: 0,
-        bookings: [],
-        listings: [],
-      });
-
-      viewer = (await db.users.findOne({ _id: insertRes.insertedId })) as User;
-    }
-
-    return viewer;
+    return updateRes as User;
   } catch (error) {
     console.error("Error logging in via Google:", error);
     throw new Error("Failed to log in via Google");
