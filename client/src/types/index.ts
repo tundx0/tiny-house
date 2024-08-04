@@ -13,3 +13,11 @@ export type Listing = {
 export interface ListingCardProps {
   listing: Listing;
 }
+
+export interface Viewer {
+  id?: string | null;
+  token?: string | null;
+  avatar?: string | null;
+  hasWallet?: boolean | null;
+  didRequest: boolean;
+}
