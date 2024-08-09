@@ -46,7 +46,7 @@ const Login: React.FC = () => {
   const isLoading = authUrlLoading || logInLoading;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex flex-col items-center justify-center min-h-[93vh] bg-gray-100">
       <div className="p-8 bg-white rounded shadow-md">
         <h1 className="text-2xl font-bold mb-4">Welcome Back</h1>
         <p className="mb-4">Log in to access your account</p>
