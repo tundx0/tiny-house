@@ -1,7 +1,8 @@
 import React from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import withSuspense from "./HOCs/withSuspense";
 import { ViewerProvider } from "./context/ViewerContext";
+import { NavBar } from "./components";
 
 const Home = React.lazy(() => import("./components/Home"));
 const Listings = React.lazy(() => import("./components/Listings"));
@@ -19,30 +20,45 @@ const UserWithSuspense = withSuspense(User);
 const LoginWithSuspense = withSuspense(Login);
 const NotFoundWithSuspense = withSuspense(NotFound);
 
+const NavbarWrapper = () => {
+  return (
+    <div>
+      <NavBar />
+      <Outlet />
+    </div>
+  );
+};
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <HomeWithSuspense />,
-  },
-  {
-    path: "/listings/:location?",
-    element: <ListingsWithSuspense />,
-  },
-  {
-    path: "/listing/:id",
-    element: <ListingWithSuspense />,
-  },
-  {
-    path: "/host",
-    element: <HostWithSuspense />,
-  },
-  {
-    path: "/user/:id",
-    element: <UserWithSuspense />,
-  },
-  {
-    path: "/login",
-    element: <LoginWithSuspense />,
+    element: <NavbarWrapper />,
+    children: [
+      {
+        path: "/",
+        element: <HomeWithSuspense />,
+      },
+      {
+        path: "/listings/:location?",
+        element: <ListingsWithSuspense />,
+      },
+      {
+        path: "/listing/:id",
+        element: <ListingWithSuspense />,
+      },
+      {
+        path: "/host",
+        element: <HostWithSuspense />,
+      },
+      {
+        path: "/user/:id",
+        element: <UserWithSuspense />,
+      },
+      {
+        path: "/login",
+        element: <LoginWithSuspense />,
+      },
+    ],
   },
   {
     path: "*",
