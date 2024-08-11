@@ -1,10 +1,8 @@
-import Listings from "./Listings";
-import Listing from "./Listing";
-import Home from "./Home";
-import Host from "./Host";
-import NotFound from "./NotFound";
-import User from "./User";
-import Login from "./Login";
-import NavBar from "./NavBar";
-
-export { Listings, Listing, Home, Host, NotFound, User, Login, NavBar };
+export * from "./Home";
+export * from "./Host";
+export * from "./Listing";
+export * from "./Listings";
+export * from "./Login";
+export * from "./NavBar";
+export * from "./NotFound";
+export * from "./User";
