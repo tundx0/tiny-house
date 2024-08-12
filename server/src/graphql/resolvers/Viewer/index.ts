@@ -6,7 +6,7 @@ import crypto from "crypto";
 
 const cookieOptions = {
   httpOnly: true,
-  sameSite: true,
+  sameSite: "strict" as any,
   signed: true,
   secure: process.env.NODE_ENV === "development" ? false : true,
 };
@@ -62,7 +62,6 @@ const logInViaGoogle = async (
       ...cookieOptions,
       maxAge: 365 * 24 * 60 * 60 * 1000,
     });
-    console.log(res);
 
     return updateRes as User;
   } catch (error) {
