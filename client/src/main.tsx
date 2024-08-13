@@ -5,6 +5,7 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 
 const client = new ApolloClient({
   uri: import.meta.env.VITE_GRAPHQL_ENDPOINT,
+  credentials: "include",
   cache: new InMemoryCache(),
 });
 
