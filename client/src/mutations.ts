@@ -1,7 +1,7 @@
 import { gql } from "./__generated__/gql";
 
 export const LOG_IN = gql(/* GraphQL */ `
-  mutation LogIn($input: LogInInput!) {
+  mutation LogIn($input: LogInInput) {
     logIn(input: $input) {
       id
       token
