@@ -18,7 +18,16 @@ const ser = async (app: Application) => {
     context: ({ req, res }) => ({ db, req, res }),
   });
   await server.start();
-  app.use(server.getMiddleware({ path: "/api" }) as Application);
+  app.use(
+    server.getMiddleware({
+      path: "/api",
+      cors: {
+        credentials: true,
+        origin: ["http://api.domain.com:5173", "http://localhost:5173"],
+      },
+    }) as Application
+  );
+
   app.listen(port);
 
   console.log(`[app running on]: http://localhost:${port}`);
