@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import withSuspense from "./HOCs/withSuspense";
-import { ViewerProvider } from "./context/ViewerContext";
+import { useViewer, ViewerProvider } from "./context/ViewerContext";
 import { NavBar } from "./components";
+import { useMutation } from "@apollo/client";
+import { LOG_IN } from "./mutations";
 
 const Home = React.lazy(() => import("./components/Home"));
 const Listings = React.lazy(() => import("./components/Listings"));
@@ -67,11 +69,24 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const { viewer, setViewer } = useViewer();
+  const [logIn, { error }] = useMutation(LOG_IN, {
+    onCompleted: (data) => {
+      if (data && data.logIn) {
+        setViewer(data.logIn);
+      }
+    },
+  });
+  const logInRef = useRef(logIn);
+
+  useEffect(() => {
+    if (!viewer.id) {
+      logInRef.current();
+    }
+  }, []);
   return (
     <>
-      <ViewerProvider>
-        <RouterProvider router={router} />
-      </ViewerProvider>
+      <RouterProvider router={router} />
     </>
   );
 }
