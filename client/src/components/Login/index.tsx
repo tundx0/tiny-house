@@ -26,8 +26,9 @@ const Login: React.FC = () => {
     if (code && !viewer.id) {
       logIn({ variables: { input: { code } } })
         .then(({ data }) => {
-          if (data && data.logIn) {
+          if (data && data.logIn && data.logIn.token) {
             setViewer(data.logIn);
+            sessionStorage.setItem("token", data.logIn.token);
             navigate(`/user/${data.logIn.id}`);
           }
         })

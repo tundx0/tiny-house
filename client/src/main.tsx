@@ -4,17 +4,14 @@ import "./index.css";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import { ViewerProvider } from "./context/ViewerContext.tsx";
 
+const token = sessionStorage.getItem("token");
+
 const client = new ApolloClient({
   uri: import.meta.env.VITE_GRAPHQL_ENDPOINT,
   credentials: "include",
   cache: new InMemoryCache(),
-  request: async (operation) => {
-    const token = sessionStorage.getItem("token");
-    operation.setContext({
-      headers: {
-        "X-CSRF-TOKEN": token || "",
-      },
-    });
+  headers: {
+    "X-CSRF-TOKEN": token || "",
   },
 });
 
