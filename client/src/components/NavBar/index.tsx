@@ -5,7 +5,7 @@ import { useClickOutside } from "../../hooks/useClickOutside";
 import { LOG_OUT } from "../../mutations";
 import { useMutation } from "@apollo/client";
 
-const NavBar: React.FC = () => {
+export const NavBar: React.FC = () => {
   const { viewer: user, setViewer } = useViewer();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -16,6 +16,7 @@ const NavBar: React.FC = () => {
         avatar: null,
         didRequest: false,
       });
+      sessionStorage.removeItem("token");
     },
     onError: (error) => {
       console.error("Logout failed:", error);
@@ -94,5 +95,3 @@ const NavBar: React.FC = () => {
     </div>
   );
 };
-
-export default NavBar;

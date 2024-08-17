@@ -1,6 +1,6 @@
 import React from "react";
 
-const Host = () => {
+const Host: React.FC = () => {
   return <div>Host</div>;
 };
 
