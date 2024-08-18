@@ -8,7 +8,7 @@ export const typeDefs = gql`
     contact: String!
     hasWallet: String!
     income: Int
-    bookings: Bookings!
+    bookings: Bookings
     listings: Listings!
   }
 
