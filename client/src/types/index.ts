@@ -21,3 +21,9 @@ export interface Viewer {
   hasWallet?: boolean | null;
   didRequest: boolean;
 }
+
+export interface SvgProps extends React.SVGProps<SVGSVGElement> {
+  width?: number | string;
+  height?: number | string;
+  fill?: string;
+}
