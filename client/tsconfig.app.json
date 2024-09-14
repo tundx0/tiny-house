@@ -23,8 +23,14 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
+   
     "paths": {
-      "types": ["types"]
+      "@/*": [
+        "./src/*"
+      ],
+      "types": ["./src/types"],
+      
+      "contexts": ["./src/contexts"]
     }
   },
   "include": ["src"]
