@@ -16,6 +16,7 @@ const documents = {
     "\n  mutation LogIn($input: LogInInput) {\n    logIn(input: $input) {\n      id\n      token\n      avatar\n      hasWallet\n      didRequest\n    }\n  }\n": types.LogInDocument,
     "\n  mutation LogOut {\n    logOut {\n      id\n      token\n      avatar\n      hasWallet\n      didRequest\n    }\n  }\n": types.LogOutDocument,
     "\n  query AuthUrl {\n    authUrl\n  }\n": types.AuthUrlDocument,
+    "\n  query User($id: ID!) {\n    user(id: $id) {\n      id\n      name\n      avatar\n      email\n      hasWallet\n      income\n    }\n  }\n": types.UserDocument,
 };
 
 /**
@@ -44,6 +45,10 @@ export function gql(source: "\n  mutation LogOut {\n    logOut {\n      id\n    
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  query AuthUrl {\n    authUrl\n  }\n"): (typeof documents)["\n  query AuthUrl {\n    authUrl\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query User($id: ID!) {\n    user(id: $id) {\n      id\n      name\n      avatar\n      email\n      hasWallet\n      income\n    }\n  }\n"): (typeof documents)["\n  query User($id: ID!) {\n    user(id: $id) {\n      id\n      name\n      avatar\n      email\n      hasWallet\n      income\n    }\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

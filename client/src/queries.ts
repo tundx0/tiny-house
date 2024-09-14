@@ -5,3 +5,16 @@ export const AUTH_URL = gql(/* GraphQL */ `
     authUrl
   }
 `);
+
+export const USER = gql(/* GraphQL */ `
+  query User($id: ID!) {
+    user(id: $id) {
+      id
+      name
+      avatar
+      email
+      hasWallet
+      income
+    }
+  }
+`);
