@@ -3,7 +3,7 @@ import { useLazyQuery, useMutation } from "@apollo/client";
 import { AUTH_URL } from "../../queries";
 import { useNavigate, useLocation } from "react-router-dom";
 import { LOG_IN } from "../../mutations";
-import { useViewer } from "../../context/ViewerContext";
+import { useViewer } from "../../contexts/ViewerContext";
 
 const Login: React.FC = () => {
   const [getAuthUrl, { loading: authUrlLoading, data: authUrlData }] =

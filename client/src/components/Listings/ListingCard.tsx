@@ -2,7 +2,7 @@ import { Star, Users, Bed, Bath } from "lucide-react";
 
 import { ListingCardProps } from "src/types";
 
-const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
+export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
   const {
     address,
     image,
@@ -54,4 +54,4 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
   );
 };
 
-export default ListingCard;
+

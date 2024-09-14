@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useViewer } from "../../context/ViewerContext";
+import { useViewer } from "../../contexts/ViewerContext";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { LOG_OUT } from "../../mutations";
 import { useMutation } from "@apollo/client";
@@ -69,7 +69,7 @@ export const NavBar: React.FC = () => {
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10">
                   <Link
-                    to="/profile"
+                    to={`/user/${user.id}`}
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
                     Profile

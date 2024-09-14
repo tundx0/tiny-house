@@ -2,7 +2,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
-import { ViewerProvider } from "./context/ViewerContext.tsx";
+import { ViewerProvider } from "./contexts/ViewerContext.tsx";
 
 const token = sessionStorage.getItem("token");
 

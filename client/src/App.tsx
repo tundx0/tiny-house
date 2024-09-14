@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import withSuspense from "./HOCs/withSuspense";
-import { useViewer, ViewerProvider } from "./context/ViewerContext";
+import { useViewer, ViewerProvider } from "./contexts/ViewerContext";
 import { NavBar } from "./components";
 import { useMutation } from "@apollo/client";
 import { LOG_IN } from "./mutations";
