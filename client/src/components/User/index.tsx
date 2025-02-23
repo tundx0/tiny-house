@@ -1,14 +1,24 @@
 import { useQuery } from "@apollo/client";
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { USER } from "../../queries";
 import { UserQuery } from "src/__generated__/graphql";
 import { ProfileCard } from "@/components";
+import { ListingCard } from "../Listings/ListingCard";
+import { Pagination } from "../common/Pagination";
+import { useViewer } from "@/contexts/ViewerContext";
+
+const ITEMS_PER_PAGE = 4;
 
 const User: React.FC = () => {
   const { id } = useParams();
+  const [bookingsPage, setBookingsPage] = useState(1);
+  const [listingsPage, setListingsPage] = useState(1);
+  const { viewer } = useViewer();
+
   const { data, loading, error } = useQuery<UserQuery>(USER, {
-    variables: { id },
+    variables: { id, bookingsPage, listingsPage, limit: ITEMS_PER_PAGE },
+    skip: !viewer.id,
   });
 
   if (loading) return <LoadingSkeleton />;
@@ -19,7 +29,62 @@ const User: React.FC = () => {
   if (!user)
     return <div className="text-center text-gray-600">User not found</div>;
 
-  return <ProfileCard user={user} />;
+  const bookingsTotalPages = Math.ceil(
+    (user.bookings?.total || 1) / ITEMS_PER_PAGE
+  );
+  const listingsTotalPages = Math.ceil(
+    (user.listings?.total || 1) / ITEMS_PER_PAGE
+  );
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <ProfileCard user={user} />
+
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Bookings</h2>
+        {user.bookings?.result && user.bookings.result.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {user.bookings.result.map((booking) => (
+                <ListingCard key={booking.id} listing={booking.listing} />
+              ))}
+            </div>
+            {bookingsTotalPages > 1 && (
+              <Pagination
+                currentPage={bookingsPage}
+                totalPages={bookingsTotalPages}
+                onPageChange={(page) => setBookingsPage(page)}
+              />
+            )}
+          </>
+        ) : (
+          <p>No bookings found.</p>
+        )}
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Listings</h2>
+        {user.listings?.result && user.listings.result.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {user.listings.result.map((listing) => (
+                <ListingCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+            {listingsTotalPages > 1 && (
+              <Pagination
+                currentPage={listingsPage}
+                totalPages={listingsTotalPages}
+                onPageChange={(page) => setListingsPage(page)}
+              />
+            )}
+          </>
+        ) : (
+          <p>No listings found.</p>
+        )}
+      </div>
+    </div>
+  );
 };
 
 const LoadingSkeleton: React.FC = () => (

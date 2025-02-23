@@ -86,10 +86,18 @@ function App() {
   const logInRef = useRef(logIn);
 
   useEffect(() => {
-    if (!viewer.id) {
+    const token = sessionStorage.getItem("token");
+    if (!viewer.id && token) {
       logInRef.current();
     }
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      console.error("Login error:", error);
+    }
+  }, [error]);
+
   return (
     <>
       <RouterProvider router={router} />

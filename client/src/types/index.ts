@@ -1,12 +1,12 @@
 export type Listing = {
   address: string;
-  id?: string | number;
+  id: string | number;
   image: string;
-  numOfBaths: number;
-  numOfBeds: number;
+  numOfBaths?: number;
+  numOfBeds?: number;
   numOfGuests: number;
   price: number;
-  rating: number;
+  rating?: number;
   title: string;
 };
 
