@@ -23,7 +23,11 @@ const ser = async (app: Application) => {
       path: "/api",
       cors: {
         credentials: true,
-        origin: ["http://api.domain.com:5173", "http://localhost:5173"],
+        origin: [
+          "http://domain.com:5173",
+          "http://localhost:5173",
+          "https://studio.apollographql.com",
+        ],
       },
     }) as Application
   );

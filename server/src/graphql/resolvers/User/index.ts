@@ -23,6 +23,7 @@ export const userResolvers = {
         }
 
         const viewer = await authorize(db, req);
+
         if (viewer && viewer._id === user._id) {
           user.authorized = true;
         }
@@ -91,9 +92,9 @@ export const userResolvers = {
       { db }: { db: Database }
     ): Promise<UserListingsData | null> => {
       try {
-        if (!user.authorized) {
-          return null;
-        }
+        // if (!user.authorized) {
+        //   return null;
+        // }
 
         const itemsPerPage = limit > 0 ? limit : 10;
         const currentPage = page > 0 ? page : 1;

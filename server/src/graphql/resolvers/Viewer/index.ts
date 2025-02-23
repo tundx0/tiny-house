@@ -76,6 +76,7 @@ const logInViaCookie = async (
   res: Response,
   req: Request
 ): Promise<User | undefined> => {
+
   const updateRes = await db.users.findOneAndUpdate(
     { _id: req.signedCookies.viewer },
     { $set: { token } },
@@ -108,8 +109,6 @@ export const viewerResolvers = {
       try {
         const code = input ? input?.code : null;
         const token = crypto.randomBytes(16).toString("hex");
-
-        console.log(code);
 
         const viewer = code
           ? await logInViaGoogle(code, token, db, res)
