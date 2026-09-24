@@ -128,14 +128,14 @@ export const ListingCreateBooking: React.FC<Props> = ({
         <div className="mt-4 space-y-1 text-gray-700">
           <div className="flex justify-between">
             <span>
-              {formatPrice(price, false)} × {nights}{" "}
+              {formatPrice(price)} × {nights}{" "}
               {nights === 1 ? "night" : "nights"}
             </span>
-            <span>{formatPrice(price * nights, false)}</span>
+            <span>{formatPrice(price * nights)}</span>
           </div>
           <div className="flex justify-between font-semibold text-gray-900 border-t border-gray-200 pt-2">
             <span>Total</span>
-            <span>{formatPrice(price * nights, false)}</span>
+            <span>{formatPrice(price * nights)}</span>
           </div>
         </div>
       )}

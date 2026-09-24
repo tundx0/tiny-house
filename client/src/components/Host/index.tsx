@@ -5,7 +5,7 @@ import { Building2, Home as HomeIcon, ImagePlus } from "lucide-react";
 import { HOST_LISTING } from "@/mutations";
 import { ListingType } from "@/__generated__/graphql";
 import { useViewer } from "@/contexts/ViewerContext";
-import { stripeAuthUrl } from "@/lib/utils";
+import { useConnectStripe } from "@/hooks/useConnectStripe";
 
 const MAX_IMAGE_BYTES = 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png"];
@@ -84,13 +84,17 @@ const Host: React.FC = () => {
   const [hostListing, { loading, error }] = useMutation(HOST_LISTING, {
     onCompleted: (data) => navigate(`/listing/${data.hostListing.id}`),
   });
+  const {
+    connectStripe,
+    loading: connecting,
+    error: connectError,
+  } = useConnectStripe();
 
   if (!viewer.didRequest) {
     return <div className="text-center py-16 text-gray-600">Loading...</div>;
   }
 
   if (!viewer.id || !viewer.hasWallet) {
-    const stripeUrl = stripeAuthUrl();
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
         <h1 className="text-3xl font-bold text-gray-900">
@@ -109,20 +113,17 @@ const Host: React.FC = () => {
             >
               Sign in
             </Link>
-          ) : stripeUrl ? (
-            <a
-              href={stripeUrl}
-              className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded"
-            >
-              Connect with Stripe
-            </a>
           ) : (
-            <Link
-              to={`/user/${viewer.id}`}
-              className="text-blue-600 hover:underline"
+            <button
+              onClick={connectStripe}
+              disabled={connecting}
+              className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded disabled:opacity-50"
             >
-              Go to your profile
-            </Link>
+              {connecting ? "Redirecting..." : "Connect with Stripe"}
+            </button>
+          )}
+          {connectError && (
+            <p className="text-sm text-red-600 mt-3">{connectError.message}</p>
           )}
         </div>
       </div>

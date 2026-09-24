@@ -72,6 +72,7 @@ export const typeDefs = gql`
 
   input ConnectStripeInput {
     code: String!
+    state: String!
   }
 
   input HostListingInput {
@@ -93,6 +94,7 @@ export const typeDefs = gql`
 
   type Query {
     authUrl: String!
+    stripeAuthUrl: String!
     user(id: ID!): User!
     listing(id: ID!): Listing!
     listings(

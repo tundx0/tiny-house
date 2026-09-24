@@ -5,14 +5,17 @@ import logo from "@/assets/tinyhouse-logo.png";
 import { useViewer } from "../../contexts/ViewerContext";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { LOG_OUT } from "../../mutations";
-import { useMutation } from "@apollo/client";
+import { useApolloClient, useMutation } from "@apollo/client";
 
 export const NavBar: React.FC = () => {
   const { viewer: user, setViewer } = useViewer();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const client = useApolloClient();
 
   const [logOut] = useMutation(LOG_OUT, {
-    onCompleted: () => {
+    onCompleted: async () => {
+      // Drop everything cached for the previous account (bookings, income).
+      await client.clearStore();
       setViewer({
         id: null,
         token: null,

@@ -19,6 +19,28 @@ import {
   ListingsFilter,
 } from "./types";
 
+const MAX_IMAGE_BYTES = 1024 * 1024;
+const IMAGE_DATA_URL = /^data:(image\/(?:jpeg|png));base64,([A-Za-z0-9+/]+={0,2})$/;
+// Leading bytes of each allowed image format.
+const IMAGE_SIGNATURES: Record<string, number[]> = {
+  "image/jpeg": [0xff, 0xd8, 0xff],
+  "image/png": [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+};
+
+// Only JPEG/PNG data urls whose decoded bytes really are that format.
+const isValidImage = (image: string): boolean => {
+  const match = IMAGE_DATA_URL.exec(image);
+  if (!match) return false;
+  const [, mimeType, data] = match;
+  const bytes = Buffer.from(data, "base64");
+  const signature = IMAGE_SIGNATURES[mimeType];
+  return (
+    bytes.length > 0 &&
+    bytes.length <= MAX_IMAGE_BYTES &&
+    signature.every((byte, i) => bytes[i] === byte)
+  );
+};
+
 const verifyHostListingInput = ({
   title,
   description,
@@ -36,8 +58,8 @@ const verifyHostListingInput = ({
       "listing description must be between 1 and 5000 characters"
     );
   }
-  if (!image.startsWith("data:image/")) {
-    throw new Error("listing image must be a base64 encoded image");
+  if (!isValidImage(image)) {
+    throw new Error("listing image must be a JPEG or PNG image under 1MB");
   }
   if (!Object.values(ListingType).includes(type)) {
     throw new Error("listing type must be either an apartment or house");
