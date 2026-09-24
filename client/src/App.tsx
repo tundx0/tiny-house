@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import withSuspense from "./HOCs/withSuspense";
-import { useViewer, ViewerProvider } from "./contexts/ViewerContext";
+import { useViewer } from "./contexts/ViewerContext";
 import { NavBar } from "./components";
 import { useMutation } from "@apollo/client";
 import { LOG_IN } from "./mutations";
@@ -13,6 +13,7 @@ const Host = React.lazy(() => import("./components/Host"));
 const User = React.lazy(() => import("./components/User"));
 const Login = React.lazy(() => import("./components/Login"));
 const NotFound = React.lazy(() => import("./components/NotFound"));
+const Stripe = React.lazy(() => import("./components/Stripe"));
 
 const HomeWithSuspense = withSuspense(Home);
 const ListingsWithSuspense = withSuspense(Listings);
@@ -21,6 +22,7 @@ const HostWithSuspense = withSuspense(Host);
 const UserWithSuspense = withSuspense(User);
 const LoginWithSuspense = withSuspense(Login);
 const NotFoundWithSuspense = withSuspense(NotFound);
+const StripeWithSuspense = withSuspense(Stripe);
 
 const NavbarWrapper = () => {
   return (
@@ -60,6 +62,10 @@ const router = createBrowserRouter([
         path: "/login",
         element: <LoginWithSuspense />,
       },
+      {
+        path: "/stripe",
+        element: <StripeWithSuspense />,
+      },
     ],
   },
   {
@@ -71,6 +77,9 @@ const router = createBrowserRouter([
 function App() {
   const { viewer, setViewer } = useViewer();
   const [logIn, { error }] = useMutation(LOG_IN, {
+    onError: () => {
+      setViewer((prev) => ({ ...prev, didRequest: true }));
+    },
     onCompleted: (data) => {
       if (data && data.logIn) {
         setViewer(data.logIn);
@@ -85,11 +94,16 @@ function App() {
   });
   const logInRef = useRef(logIn);
 
+  // Try to restore the session from the viewer cookie on first load. The
+  // Login page handles the OAuth code exchange itself.
   useEffect(() => {
-    const token = sessionStorage.getItem("token");
-    if (!viewer.id && token) {
+    const isOAuthCallback =
+      window.location.pathname === "/login" &&
+      new URLSearchParams(window.location.search).has("code");
+    if (!viewer.id && !isOAuthCallback) {
       logInRef.current();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
