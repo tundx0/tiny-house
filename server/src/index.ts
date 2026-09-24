@@ -21,12 +21,15 @@ const ser = async (app: Application) => {
   app.use(
     server.getMiddleware({
       path: "/api",
+      // Listing images are sent as base64 strings.
+      bodyParserConfig: { limit: "2mb" },
       cors: {
         credentials: true,
         origin: [
           "http://domain.com:5173",
           "http://localhost:5173",
           "https://studio.apollographql.com",
+          ...(process.env.PUBLIC_URL ? [process.env.PUBLIC_URL] : []),
         ],
       },
     }) as Application

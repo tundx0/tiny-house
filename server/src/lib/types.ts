@@ -40,6 +40,7 @@ export interface Listing {
   bookingsIndex: BookingsIndex;
   price: number;
   numOfGuests: number;
+  authorized?: boolean;
 }
 
 // Ensure mongo methods return the listing type from their result so typescript can recognize the type of information being returned from the database queries.
@@ -70,6 +71,6 @@ export interface Database {
   users: Collection<User>;
 }
 
-export interface LisitingArgs {
+export interface ListingArgs {
   id: string;
 }
