@@ -45,3 +45,61 @@ export const USER = gql(/* GraphQL */ `
     }
   }
 `);
+
+export const LISTING = gql(/* GraphQL */ `
+  query Listing($id: ID!, $bookingsPage: Int!, $limit: Int!) {
+    listing(id: $id) {
+      id
+      title
+      description
+      image
+      host {
+        id
+        name
+        avatar
+        hasWallet
+      }
+      type
+      address
+      city
+      bookings(limit: $limit, page: $bookingsPage) {
+        total
+        result {
+          id
+          tenant {
+            id
+            name
+            avatar
+          }
+          checkIn
+          checkOut
+        }
+      }
+      bookingsIndex
+      price
+      numOfGuests
+    }
+  }
+`);
+
+export const LISTINGS = gql(/* GraphQL */ `
+  query Listings(
+    $location: String
+    $filter: ListingsFilter!
+    $limit: Int!
+    $page: Int!
+  ) {
+    listings(location: $location, filter: $filter, limit: $limit, page: $page) {
+      region
+      total
+      result {
+        id
+        title
+        image
+        address
+        price
+        numOfGuests
+      }
+    }
+  }
+`);

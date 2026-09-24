@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { FormEvent, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Search } from "lucide-react";
+import logo from "@/assets/tinyhouse-logo.png";
 import { useViewer } from "../../contexts/ViewerContext";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { LOG_OUT } from "../../mutations";
@@ -13,9 +15,12 @@ export const NavBar: React.FC = () => {
     onCompleted: () => {
       setViewer({
         id: null,
+        token: null,
         avatar: null,
-        didRequest: false,
+        hasWallet: null,
+        didRequest: true,
       });
+      setIsDropdownOpen(false);
       sessionStorage.removeItem("token");
     },
     onError: (error) => {
@@ -28,6 +33,22 @@ export const NavBar: React.FC = () => {
     } catch (error) {
       console.error("Error logging out:", error);
     }
+  };
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [search, setSearch] = useState("");
+
+  // Keep the search box in sync with the /listings/:location route.
+  useEffect(() => {
+    const match = location.pathname.match(/^\/listings\/(.+)$/);
+    setSearch(match ? decodeURIComponent(match[1]) : "");
+  }, [location.pathname]);
+
+  const handleSearch = (event: FormEvent) => {
+    event.preventDefault();
+    const value = search.trim();
+    navigate(value ? `/listings/${encodeURIComponent(value)}` : "/listings");
   };
 
   const closeDropdown = () => {
@@ -45,13 +66,24 @@ export const NavBar: React.FC = () => {
       <header className="p-4 flex justify-between items-center container mx-auto">
         <div>
           <Link to="/">
-            <img
-              src="/src/assets/tinyhouse-logo.png"
-              alt="TinyHouse Logo"
-              className="h-8 md:h-10"
-            />
+            <img src={logo} alt="TinyHouse Logo" className="h-8 md:h-10" />
           </Link>
         </div>
+        <form
+          onSubmit={handleSearch}
+          className="hidden sm:flex flex-1 max-w-md mx-6 items-center border border-gray-300 rounded-full px-4 py-2 focus-within:border-blue-500"
+          role="search"
+        >
+          <Search className="h-4 w-4 text-gray-400 mr-2" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search 'San Francisco'"
+            aria-label="Search listings by location"
+            className="flex-1 outline-none bg-transparent text-sm text-gray-800"
+          />
+        </form>
         <div className="flex items-center gap-4">
           <Link to="/host">
             <button className="text-gray-700 hover:text-blue-500 transition duration-300">
@@ -70,6 +102,7 @@ export const NavBar: React.FC = () => {
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-10">
                   <Link
                     to={`/user/${user.id}`}
+                    onClick={closeDropdown}
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                   >
                     Profile

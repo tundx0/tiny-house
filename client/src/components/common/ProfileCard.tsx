@@ -1,19 +1,46 @@
 import React from "react";
+import { useMutation } from "@apollo/client";
 import { useViewer } from "../../contexts/ViewerContext";
 import { EmailIcon, WalletIcon, IncomeIcon } from "@/components/Icons";
+import { DISCONNECT_STRIPE } from "@/mutations";
+import { formatPrice, stripeAuthUrl } from "@/lib/utils";
 
 export type UserData = {
   id: string;
   name: string;
   avatar: string;
   email: string;
-  hasWallet: string;
+  hasWallet: boolean;
   income?: number | null;
 };
 
-export const ProfileCard: React.FC<{ user: UserData }> = ({ user }) => {
-  const { viewer } = useViewer();
+export const ProfileCard: React.FC<{
+  user: UserData;
+  onWalletChange?: () => void;
+}> = ({ user, onWalletChange }) => {
+  const { viewer, setViewer } = useViewer();
   const isOwnProfile = viewer.id === user.id;
+
+  const [disconnectStripe, { loading: disconnecting, error }] = useMutation(
+    DISCONNECT_STRIPE,
+    {
+      onCompleted: (data) => {
+        setViewer((prev) => ({
+          ...prev,
+          hasWallet: data.disconnectStripe.hasWallet,
+        }));
+        onWalletChange?.();
+      },
+    },
+  );
+
+  const handleConnectStripe = () => {
+    const url = stripeAuthUrl();
+    if (url) {
+      window.location.href = url;
+    }
+  };
+
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden max-w-md mx-auto">
       <div className="bg-gray-200 h-32"></div>
@@ -36,23 +63,46 @@ export const ProfileCard: React.FC<{ user: UserData }> = ({ user }) => {
           </div>
           <div className="flex items-center justify-center space-x-2 text-gray-600">
             <WalletIcon />
-            <span>Wallet: {user.hasWallet === "true" ? "Yes" : "No"}</span>
+            <span>
+              Stripe: {user.hasWallet ? "Connected" : "Not connected"}
+            </span>
           </div>
           {user.income !== null && user.income !== undefined && (
             <div className="flex items-center justify-center space-x-2 text-gray-600">
               <IncomeIcon />
-              <span>Income: ${user.income.toLocaleString()}</span>
+              <span>Income: {formatPrice(user.income, false)}</span>
             </div>
           )}
         </div>
-        {isOwnProfile && user.hasWallet !== "true" && (
+        {isOwnProfile && (
           <div className="mt-6">
-            <button
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              onClick={() => {}}
-            >
-              Connect Stripe
-            </button>
+            {user.hasWallet ? (
+              <button
+                className="w-full border border-red-400 text-red-600 hover:bg-red-50 font-bold py-2 px-4 rounded disabled:opacity-50"
+                onClick={() => disconnectStripe()}
+                disabled={disconnecting}
+              >
+                {disconnecting ? "Disconnecting..." : "Disconnect Stripe"}
+              </button>
+            ) : (
+              <>
+                <button
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+                  onClick={handleConnectStripe}
+                  disabled={!stripeAuthUrl()}
+                >
+                  Connect Stripe
+                </button>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  Connect a Stripe account to host listings and receive payouts.
+                </p>
+              </>
+            )}
+            {error && (
+              <p className="text-sm text-red-600 mt-2 text-center">
+                {error.message}
+              </p>
+            )}
           </div>
         )}
       </div>
