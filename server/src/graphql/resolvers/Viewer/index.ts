@@ -100,6 +100,17 @@ export const viewerResolvers = {
         throw new Error(`Failed to query google auth url: ${error}`);
       }
     },
+    stripeAuthUrl: async (
+      _root: undefined,
+      _args: Record<string, never>,
+      { db, req }: { db: Database; req: Request }
+    ): Promise<string> => {
+      const viewer = await authorize(db, req);
+      if (!viewer) {
+        throw new Error("viewer cannot be found");
+      }
+      return Stripe.authUrl(viewer._id);
+    },
   },
   Mutation: {
     logIn: async (
@@ -149,6 +160,10 @@ export const viewerResolvers = {
         const viewer = await authorize(db, req);
         if (!viewer) {
           throw new Error("viewer cannot be found");
+        }
+
+        if (!Stripe.verifyState(viewer._id, input.state)) {
+          throw new Error("invalid or expired Stripe authorization state");
         }
 
         const walletId = await Stripe.connect(input.code);

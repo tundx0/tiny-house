@@ -3,7 +3,8 @@ import { useMutation } from "@apollo/client";
 import { useViewer } from "../../contexts/ViewerContext";
 import { EmailIcon, WalletIcon, IncomeIcon } from "@/components/Icons";
 import { DISCONNECT_STRIPE } from "@/mutations";
-import { formatPrice, stripeAuthUrl } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils";
+import { useConnectStripe } from "@/hooks/useConnectStripe";
 
 export type UserData = {
   id: string;
@@ -34,12 +35,11 @@ export const ProfileCard: React.FC<{
     },
   );
 
-  const handleConnectStripe = () => {
-    const url = stripeAuthUrl();
-    if (url) {
-      window.location.href = url;
-    }
-  };
+  const {
+    connectStripe,
+    loading: connecting,
+    error: connectError,
+  } = useConnectStripe();
 
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden max-w-md mx-auto">
@@ -70,7 +70,7 @@ export const ProfileCard: React.FC<{
           {user.income !== null && user.income !== undefined && (
             <div className="flex items-center justify-center space-x-2 text-gray-600">
               <IncomeIcon />
-              <span>Income: {formatPrice(user.income, false)}</span>
+              <span>Income: {formatPrice(user.income)}</span>
             </div>
           )}
         </div>
@@ -88,19 +88,19 @@ export const ProfileCard: React.FC<{
               <>
                 <button
                   className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-                  onClick={handleConnectStripe}
-                  disabled={!stripeAuthUrl()}
+                  onClick={connectStripe}
+                  disabled={connecting}
                 >
-                  Connect Stripe
+                  {connecting ? "Redirecting..." : "Connect Stripe"}
                 </button>
                 <p className="text-xs text-gray-500 mt-2 text-center">
                   Connect a Stripe account to host listings and receive payouts.
                 </p>
               </>
             )}
-            {error && (
+            {(error || connectError) && (
               <p className="text-sm text-red-600 mt-2 text-center">
-                {error.message}
+                {(error ?? connectError)?.message}
               </p>
             )}
           </div>

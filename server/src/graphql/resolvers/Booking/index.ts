@@ -1,7 +1,13 @@
 import { Request } from "express";
 import { ObjectId } from "mongodb";
-import { Stripe } from "../../../lib/api";
-import { Booking, Database, Listing, User } from "../../../lib/types";
+import { PaymentFailedError, Stripe } from "../../../lib/api";
+import {
+  Booking,
+  BookingStatus,
+  Database,
+  Listing,
+  User,
+} from "../../../lib/types";
 import { authorize } from "../../../lib/utils";
 import { CreateBookingArgs } from "./types";
 
@@ -12,7 +18,13 @@ const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 const parseDate = (value: string, label: string): Date => {
   const date = new Date(`${value}T00:00:00.000Z`);
-  if (!DATE_PATTERN.test(value) || Number.isNaN(date.getTime())) {
+  // Date normalizes out of range days (2026-02-31 -> 2026-03-03), so the
+  // parsed date must format back to exactly the input.
+  if (
+    !DATE_PATTERN.test(value) ||
+    Number.isNaN(date.getTime()) ||
+    date.toISOString().slice(0, 10) !== value
+  ) {
     throw new Error(`${label} must be a valid date (YYYY-MM-DD)`);
   }
   return date;
@@ -110,16 +122,11 @@ export const bookingResolvers = {
       }
 
       const totalPrice = listing.price * nights.length;
-
-      try {
-        await Stripe.charge(totalPrice, source, host.walletId);
-      } catch (error) {
-        await db.listings.updateOne(
+      const releaseNights = () =>
+        db.listings.updateOne(
           { _id: listing._id },
           { $unset: Object.fromEntries(nightPaths.map((path) => [path, ""])) }
         );
-        throw new Error(`Failed to charge booking: ${error}`);
-      }
 
       const booking: Booking = {
         _id: new ObjectId(),
@@ -127,24 +134,128 @@ export const bookingResolvers = {
         tenant: viewer._id,
         checkIn: input.checkIn,
         checkOut: input.checkOut,
+        status: BookingStatus.Pending,
       };
 
-      await db.bookings.insertOne(booking);
-      await Promise.all([
-        db.users.updateOne(
-          { _id: host._id },
-          { $inc: { income: totalPrice } }
-        ),
-        db.users.updateOne(
-          { _id: viewer._id },
-          { $push: { bookings: booking._id } }
-        ),
-        db.listings.updateOne(
-          { _id: listing._id },
-          { $push: { bookings: booking._id } }
-        ),
-      ]);
+      try {
+        await db.bookings.insertOne(booking);
+      } catch (error) {
+        await releaseNights();
+        throw new Error(`Failed to create booking: ${error}`);
+      }
 
+      let paymentIntent: string;
+      try {
+        paymentIntent = await Stripe.charge(
+          totalPrice,
+          source,
+          host.walletId,
+          booking._id.toString()
+        );
+      } catch (error) {
+        if (error instanceof PaymentFailedError) {
+          await Promise.all([
+            releaseNights(),
+            db.bookings.deleteOne({ _id: booking._id }),
+          ]);
+          throw new Error(`Failed to charge booking: ${error.message}`);
+        }
+        // The charge may or may not have gone through, so keep the pending
+        // booking and its nights until it's reconciled with Stripe.
+        console.error(
+          `[booking ${booking._id}] payment outcome unknown:`,
+          error
+        );
+        throw new Error(
+          "We couldn't confirm your payment. Your dates are on hold; please contact support before trying again."
+        );
+      }
+
+      // Finalize step by step so a failure can undo exactly what was applied
+      // before refunding the charge.
+      const undo: (() => Promise<unknown>)[] = [];
+      const steps: [() => Promise<unknown>, () => Promise<unknown>][] = [
+        [
+          () =>
+            db.bookings.updateOne(
+              { _id: booking._id },
+              { $set: { status: BookingStatus.Confirmed, paymentIntent } }
+            ),
+          () => db.bookings.deleteOne({ _id: booking._id }),
+        ],
+        [
+          () =>
+            db.users.updateOne(
+              { _id: host._id },
+              { $inc: { income: totalPrice } }
+            ),
+          () =>
+            db.users.updateOne(
+              { _id: host._id },
+              { $inc: { income: -totalPrice } }
+            ),
+        ],
+        [
+          () =>
+            db.users.updateOne(
+              { _id: viewer._id },
+              { $push: { bookings: booking._id } }
+            ),
+          () =>
+            db.users.updateOne(
+              { _id: viewer._id },
+              { $pull: { bookings: booking._id } }
+            ),
+        ],
+        [
+          () =>
+            db.listings.updateOne(
+              { _id: listing._id },
+              { $push: { bookings: booking._id } }
+            ),
+          () =>
+            db.listings.updateOne(
+              { _id: listing._id },
+              { $pull: { bookings: booking._id } }
+            ),
+        ],
+      ];
+
+      try {
+        for (const [apply, revert] of steps) {
+          await apply();
+          undo.unshift(revert);
+        }
+      } catch (error) {
+        console.error(`[booking ${booking._id}] failed to finalize:`, error);
+        try {
+          await Stripe.refund(paymentIntent);
+        } catch (refundError) {
+          // Leave the booking and nights in place so the paid stay isn't lost.
+          console.error(
+            `[booking ${booking._id}] refund failed (payment ${paymentIntent}):`,
+            refundError
+          );
+          throw new Error(
+            "Your payment went through but we couldn't save your booking. Please contact support."
+          );
+        }
+        for (const revert of undo) {
+          await revert().catch((undoError) =>
+            console.error(`[booking ${booking._id}] undo failed:`, undoError)
+          );
+        }
+        await Promise.all([
+          releaseNights(),
+          db.bookings.deleteOne({ _id: booking._id }),
+        ]);
+        throw new Error(
+          "We couldn't save your booking, so your payment has been refunded."
+        );
+      }
+
+      booking.status = BookingStatus.Confirmed;
+      booking.paymentIntent = paymentIntent;
       return booking;
     },
   },

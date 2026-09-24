@@ -21,17 +21,24 @@ const Stripe: React.FC = () => {
   });
 
   const code = searchParams.get("code");
+  const state = searchParams.get("state");
   const stripeError = searchParams.get("error_description");
 
   useEffect(() => {
     // The mutation needs an authenticated viewer, so wait for the session.
-    if (!code || !viewer.id || requested.current) return;
+    if (!code || !state || !viewer.id || requested.current) return;
     requested.current = true;
-    connectStripe({ variables: { input: { code } } });
-  }, [code, viewer.id, connectStripe]);
+    connectStripe({ variables: { input: { code, state } } }).catch(
+      () => undefined,
+    );
+  }, [code, state, viewer.id, connectStripe]);
 
   const failed =
-    !!error || !!stripeError || !code || (viewer.didRequest && !viewer.id);
+    !!error ||
+    !!stripeError ||
+    !code ||
+    !state ||
+    (viewer.didRequest && !viewer.id);
 
   return (
     <div className="flex items-center justify-center min-h-[80vh] px-4">

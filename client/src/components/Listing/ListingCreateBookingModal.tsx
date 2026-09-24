@@ -70,10 +70,8 @@ const CheckoutForm: React.FC<Props> = ({
           {formatDate(checkOut)}
         </p>
         <p>
-          {formatPrice(price, false)} × {nights} {nights === 1 ? "night" : "nights"} ={" "}
-          <span className="font-bold text-gray-900">
-            {formatPrice(total, false)}
-          </span>
+          {formatPrice(price)} × {nights} {nights === 1 ? "night" : "nights"} ={" "}
+          <span className="font-bold text-gray-900">{formatPrice(total)}</span>
         </p>
       </div>
 
@@ -100,7 +98,7 @@ const CheckoutForm: React.FC<Props> = ({
           disabled={!stripe || loading}
           className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white font-bold disabled:opacity-50"
         >
-          {loading ? "Booking..." : `Pay ${formatPrice(total, false)}`}
+          {loading ? "Booking..." : `Pay ${formatPrice(total)}`}
         </button>
       </div>
     </form>

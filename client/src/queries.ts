@@ -6,6 +6,12 @@ export const AUTH_URL = gql(/* GraphQL */ `
   }
 `);
 
+export const STRIPE_AUTH_URL = gql(/* GraphQL */ `
+  query StripeAuthUrl {
+    stripeAuthUrl
+  }
+`);
+
 export const USER = gql(/* GraphQL */ `
   query User($id: ID!, $bookingsPage: Int!, $listingsPage: Int!, $limit: Int!) {
     user(id: $id) {

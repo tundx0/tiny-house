@@ -3,5 +3,5 @@ export interface LogInArgs {
 }
 
 export interface ConnectStripeArgs {
-  input: { code: string };
+  input: { code: string; state: string };
 }

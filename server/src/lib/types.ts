@@ -57,12 +57,20 @@ export interface User {
   authorized?: boolean;
 }
 
+export enum BookingStatus {
+  // Nights reserved and payment in flight (or its outcome unknown).
+  Pending = "PENDING",
+  Confirmed = "CONFIRMED",
+}
+
 export interface Booking {
   _id: ObjectId;
   listing: ObjectId;
   tenant: string;
   checkIn: string;
   checkOut: string;
+  status?: BookingStatus;
+  paymentIntent?: string;
 }
 
 export interface Database {

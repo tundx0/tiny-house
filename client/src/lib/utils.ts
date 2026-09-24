@@ -1,11 +1,12 @@
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
-// Prices are stored in cents on the server.
-export const formatPrice = (cents: number, round = true): string => {
-  const dollars = cents / 100;
-  return `$${dollars.toLocaleString("en-US", {
-    minimumFractionDigits: round ? 0 : 2,
-    maximumFractionDigits: round ? 0 : 2,
+// Prices are stored in cents on the server. Whole dollar amounts drop the
+// cents; anything else is shown exactly so it matches what is charged.
+export const formatPrice = (cents: number): string => {
+  const fractionDigits = cents % 100 === 0 ? 0 : 2;
+  return `$${(cents / 100).toLocaleString("en-US", {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   })}`;
 };
 
@@ -69,15 +70,4 @@ export const hasBookingConflict = (
     if (isNightBooked(index, night)) return true;
   }
   return false;
-};
-
-export const stripeAuthUrl = (): string | null => {
-  const clientId = import.meta.env.VITE_S_CLIENT_ID;
-  if (!clientId) return null;
-  const params = new URLSearchParams({
-    response_type: "code",
-    client_id: clientId,
-    scope: "read_write",
-  });
-  return `https://connect.stripe.com/oauth/authorize?${params.toString()}`;
 };
