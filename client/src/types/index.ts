@@ -1,17 +1,15 @@
 export type Listing = {
-  address: string;
-  id: string | number;
-  image: string;
-  numOfBaths?: number;
-  numOfBeds?: number;
-  numOfGuests: number;
-  price: number;
-  rating?: number;
+  id: string;
   title: string;
+  image: string;
+  address: string;
+  price: number;
+  numOfGuests: number;
 };
 
 export interface ListingCardProps {
   listing: Listing;
+  booking?: { checkIn: string; checkOut: string };
 }
 
 export interface Viewer {

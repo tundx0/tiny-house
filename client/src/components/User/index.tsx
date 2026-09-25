@@ -16,12 +16,18 @@ const User: React.FC = () => {
   const [listingsPage, setListingsPage] = useState(1);
   const { viewer } = useViewer();
 
-  const { data, loading, error } = useQuery<UserQuery>(USER, {
-    variables: { id, bookingsPage, listingsPage, limit: ITEMS_PER_PAGE },
-    skip: !viewer.id,
+  // Wait for the viewer login attempt so private fields resolve correctly.
+  const { data, loading, error, refetch } = useQuery<UserQuery>(USER, {
+    variables: {
+      id: id ?? "",
+      bookingsPage,
+      listingsPage,
+      limit: ITEMS_PER_PAGE,
+    },
+    skip: !viewer.didRequest || !id,
   });
 
-  if (loading) return <LoadingSkeleton />;
+  if (loading || !viewer.didRequest) return <LoadingSkeleton />;
   if (error) return <ErrorMessage error={error} />;
 
   const user = data?.user;
@@ -30,37 +36,43 @@ const User: React.FC = () => {
     return <div className="text-center text-gray-600">User not found</div>;
 
   const bookingsTotalPages = Math.ceil(
-    (user.bookings?.total || 1) / ITEMS_PER_PAGE
+    (user.bookings?.total || 1) / ITEMS_PER_PAGE,
   );
   const listingsTotalPages = Math.ceil(
-    (user.listings?.total || 1) / ITEMS_PER_PAGE
+    (user.listings?.total || 1) / ITEMS_PER_PAGE,
   );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <ProfileCard user={user} />
+      <ProfileCard user={user} onWalletChange={() => refetch()} />
 
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Bookings</h2>
-        {user.bookings?.result && user.bookings.result.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {user.bookings.result.map((booking) => (
-                <ListingCard key={booking.id} listing={booking.listing} />
-              ))}
-            </div>
-            {bookingsTotalPages > 1 && (
-              <Pagination
-                currentPage={bookingsPage}
-                totalPages={bookingsTotalPages}
-                onPageChange={(page) => setBookingsPage(page)}
-              />
-            )}
-          </>
-        ) : (
-          <p>No bookings found.</p>
-        )}
-      </div>
+      {user.bookings && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Bookings</h2>
+          {user.bookings?.result && user.bookings.result.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {user.bookings.result.map((booking) => (
+                  <ListingCard
+                    key={booking.id}
+                    listing={booking.listing}
+                    booking={booking}
+                  />
+                ))}
+              </div>
+              {bookingsTotalPages > 1 && (
+                <Pagination
+                  currentPage={bookingsPage}
+                  totalPages={bookingsTotalPages}
+                  onPageChange={(page) => setBookingsPage(page)}
+                />
+              )}
+            </>
+          ) : (
+            <p>No bookings found.</p>
+          )}
+        </div>
+      )}
 
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-4">Listings</h2>
