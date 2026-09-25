@@ -19,6 +19,11 @@ export const typeDefs = gql`
     HOUSE
   }
 
+  enum ListingsFilter {
+    PRICE_LOW_TO_HIGH
+    PRICE_HIGH_TO_LOW
+  }
+
   type Listing {
     id: ID!
     title: String!
@@ -27,6 +32,8 @@ export const typeDefs = gql`
     host: User!
     type: ListingType!
     address: String!
+    country: String!
+    admin: String!
     city: String!
     bookings(limit: Int!, page: Int!): Bookings
     bookingsIndex: String!
@@ -35,6 +42,7 @@ export const typeDefs = gql`
   }
 
   type Listings {
+    region: String
     total: Int!
     result: [Listing!]!
   }
@@ -44,7 +52,7 @@ export const typeDefs = gql`
     name: String!
     avatar: String!
     email: String!
-    hasWallet: String!
+    hasWallet: Boolean!
     income: Int
     bookings(limit: Int!, page: Int!): Bookings
     listings(limit: Int!, page: Int!): Listings
@@ -62,14 +70,47 @@ export const typeDefs = gql`
     code: String!
   }
 
+  input ConnectStripeInput {
+    code: String!
+    state: String!
+  }
+
+  input HostListingInput {
+    title: String!
+    description: String!
+    image: String!
+    type: ListingType!
+    address: String!
+    price: Int!
+    numOfGuests: Int!
+  }
+
+  input CreateBookingInput {
+    id: ID!
+    source: String!
+    checkIn: String!
+    checkOut: String!
+  }
+
   type Query {
     authUrl: String!
+    stripeAuthUrl: String!
     user(id: ID!): User!
-    listing(id: ID!): Listing
+    listing(id: ID!): Listing!
+    listings(
+      location: String
+      filter: ListingsFilter!
+      limit: Int!
+      page: Int!
+    ): Listings!
   }
 
   type Mutation {
     logIn(input: LogInInput): Viewer!
     logOut: Viewer!
+    connectStripe(input: ConnectStripeInput!): Viewer!
+    disconnectStripe: Viewer!
+    hostListing(input: HostListingInput!): Listing!
+    createBooking(input: CreateBookingInput!): Booking!
   }
 `;

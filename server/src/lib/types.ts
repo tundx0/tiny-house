@@ -40,6 +40,7 @@ export interface Listing {
   bookingsIndex: BookingsIndex;
   price: number;
   numOfGuests: number;
+  authorized?: boolean;
 }
 
 // Ensure mongo methods return the listing type from their result so typescript can recognize the type of information being returned from the database queries.
@@ -56,12 +57,20 @@ export interface User {
   authorized?: boolean;
 }
 
+export enum BookingStatus {
+  // Nights reserved and payment in flight (or its outcome unknown).
+  Pending = "PENDING",
+  Confirmed = "CONFIRMED",
+}
+
 export interface Booking {
   _id: ObjectId;
   listing: ObjectId;
   tenant: string;
   checkIn: string;
   checkOut: string;
+  status?: BookingStatus;
+  paymentIntent?: string;
 }
 
 export interface Database {
@@ -70,6 +79,6 @@ export interface Database {
   users: Collection<User>;
 }
 
-export interface LisitingArgs {
+export interface ListingArgs {
   id: string;
 }

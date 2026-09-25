@@ -33,6 +33,7 @@ const Login: React.FC = () => {
           }
         })
         .catch((error) => {
+          setViewer((prev) => ({ ...prev, didRequest: true }));
           console.error("Login error:", error);
         });
     }

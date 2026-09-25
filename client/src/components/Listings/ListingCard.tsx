@@ -1,57 +1,50 @@
-import { Star, Users, Bed, Bath } from "lucide-react";
+import { Link } from "react-router-dom";
+import { CalendarDays, MapPin, Users } from "lucide-react";
 
-import { ListingCardProps } from "src/types";
+import { ListingCardProps } from "@/types";
+import { formatDate, formatPrice } from "@/lib/utils";
 
-export const ListingCard: React.FC<ListingCardProps> = ({ listing }) => {
-  const {
-    address,
-    image,
-    numOfBaths,
-    numOfBeds,
-    numOfGuests,
-    price,
-    rating,
-    title,
-  } = listing;
+export const ListingCard: React.FC<ListingCardProps> = ({
+  listing,
+  booking,
+}) => {
+  const { id, address, image, numOfGuests, price, title } = listing;
   return (
-    <div className="max-w-sm rounded-lg overflow-hidden shadow-lg bg-white hover:shadow-xl transition-shadow duration-300 ease-in-out">
-      <img
-        className="w-full h-48 object-cover"
-        height={200}
-        width={200}
-        src={image}
-        alt={title}
-      />
-      <div className="px-6 py-4">
-        <div className="font-bold text-xl mb-2 text-gray-800">{title}</div>
-        <p className="text-gray-600 text-sm mb-2">{address}</p>
-        <div className="flex items-center mb-2">
-          <Star className="h-5 w-5 text-yellow-400 mr-1" />
-          <span className="text-gray-700">{rating}</span>
-        </div>
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center text-gray-700">
-            <Users className="h-5 w-5 mr-1" />
-            <span>{numOfGuests} guests</span>
-          </div>
-          <div className="flex items-center text-gray-700">
-            <Bed className="h-5 w-5 mr-1" />
-            <span>{numOfBeds} beds</span>
-          </div>
-          <div className="flex items-center text-gray-700">
-            <Bath className="h-5 w-5 mr-1" />
-            <span>{numOfBaths} baths</span>
-          </div>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-800 font-bold text-xl">${price}</span>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105">
-            Book Now
-          </button>
-        </div>
+    <Link
+      to={`/listing/${id}`}
+      className="group block rounded-lg overflow-hidden shadow-md bg-white hover:shadow-xl transition-shadow duration-300 ease-in-out"
+    >
+      <div className="overflow-hidden">
+        <img
+          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+          src={image}
+          alt={title}
+          loading="lazy"
+        />
       </div>
-    </div>
+      <div className="px-4 py-4">
+        <p className="text-gray-900 font-bold text-lg">
+          {formatPrice(price)}
+          <span className="text-sm font-normal text-gray-500"> / night</span>
+        </p>
+        <h3 className="font-semibold text-gray-800 mt-1 line-clamp-2">
+          {title}
+        </h3>
+        <p className="flex items-center text-gray-500 text-sm mt-2">
+          <MapPin className="h-4 w-4 mr-1 shrink-0" />
+          <span className="truncate">{address}</span>
+        </p>
+        <p className="flex items-center text-gray-600 text-sm mt-2">
+          <Users className="h-4 w-4 mr-1" />
+          {numOfGuests} guests
+        </p>
+        {booking && (
+          <p className="flex items-center text-blue-600 text-sm mt-2">
+            <CalendarDays className="h-4 w-4 mr-1" />
+            {formatDate(booking.checkIn)} – {formatDate(booking.checkOut)}
+          </p>
+        )}
+      </div>
+    </Link>
   );
 };
-
-
